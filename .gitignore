@@ -39,6 +39,11 @@ data/raw/*.json
 data/processed/*.csv
 data/processed/*.png
 data/processed/*.json
+# Allow specific processed outputs we want to track
+!data/processed/season_39_multi_source.csv
+!data/processed/season_39_multi_source_players.csv
+!data/processed/data_coverage_timeline.png
+!data/processed/missing_data_summary.png
 
 # Keep directory structure
 !data/raw/.gitkeep
