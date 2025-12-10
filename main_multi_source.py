@@ -4,9 +4,9 @@ import os
 import pandas as pd
 
 # --- CONFIGURATION ---
-# Let's try to grab one month of data from Season 39 to start
+# Full Season 39 (Sept 13, 2021 - May 27, 2022, but we'll cap at Dec 31 for now)
 START_DATE = datetime(2021, 9, 13)
-END_DATE = datetime(2021, 10, 13) 
+END_DATE = datetime(2021, 12, 31) 
 
 # Source configuration: 'wordpress', 'forum', or both
 SOURCES = ['wordpress', 'forum']  # Try both sources for maximum coverage
