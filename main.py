@@ -1,32 +1,62 @@
 from src.scraper import WoFScraper
 from datetime import datetime
+import pandas as pd
 import os
 
 # --- CONFIGURATION ---
-# Let's try to grab one month of data from Season 39 to start
-START_DATE = datetime(2021, 9, 13)
-END_DATE = datetime(2021, 10, 13) 
+# EXPERIMENTAL DESIGN (2-2-2 Balanced Block):
+# Baseline (Hands on Wheel): S36, S37
+# Variable (Plastic Cap):    S38, S39
+# Recovery (Hands on Wheel): S40, S41
+SEASONS = [
+    {"name": "S36", "start": datetime(2018, 9, 10), "end": datetime(2019, 6, 7)},
+    {"name": "S37", "start": datetime(2019, 9, 9),  "end": datetime(2020, 6, 5)},
+    {"name": "S38", "start": datetime(2020, 9, 14), "end": datetime(2021, 6, 11)}, # Cap Introduced
+    {"name": "S39", "start": datetime(2021, 9, 13), "end": datetime(2022, 6, 10)}, # Cap Continued
+    {"name": "S40", "start": datetime(2022, 9, 12), "end": datetime(2023, 6, 9)}, # Cap Removed
+    {"name": "S41", "start": datetime(2023, 9, 11), "end": datetime(2024, 6, 7)}, # Pat's Final Season
+]
 
 def main():
     scraper = WoFScraper()
-    
-    print("--- Starting Data Collection Experiment ---")
-    df = scraper.batch_scrape_season(START_DATE, END_DATE)
-    
-    if not df.empty:
-        # Save the raw dataset
-        output_file = os.path.join("data", "processed", "season_39_sample.csv")
+    all_season_data = []
+
+    print(f"--- Starting Longitudinal Study ({len(SEASONS)} Seasons) ---")
+
+    for season in SEASONS:
+        print(f"\n>> PROCESSING {season['name']} ({season['start'].date()} to {season['end'].date()})")
         
-        # Ensure directory exists
-        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        # Scrape the specific date range
+        df = scraper.batch_scrape_season(season['start'], season['end'])
         
-        df.to_csv(output_file, index=False)
-        print(f"\nSUCCESS: Collected {len(df)} episodes.")
-        print(f"Data saved to: {output_file}")
-        print("\nFirst 5 rows:")
-        print(df.head())
+        if not df.empty:
+            # Tag the data with the season name (Crucial for the DiD Analysis)
+            df['season_id'] = season['name']
+            all_season_data.append(df)
+            
+            # Save individual checkpoints (safety first!)
+            checkpoint_dir = os.path.join("data", "processed")
+            os.makedirs(checkpoint_dir, exist_ok=True)
+            
+            checkpoint_path = os.path.join(checkpoint_dir, f"{season['name']}_raw.csv")
+            df.to_csv(checkpoint_path, index=False)
+            print(f"   [Saved Checkpoint]: {checkpoint_path}")
+        else:
+            print(f"   [!] Warning: No data found for {season['name']}")
+
+    # Combine everything into one Master Dataset
+    if all_season_data:
+        master_df = pd.concat(all_season_data, ignore_index=True)
+        master_path = os.path.join("data", "processed", "longitudinal_data_raw.csv")
+        master_df.to_csv(master_path, index=False)
+        
+        print("\n" + "="*50)
+        print(f"LONGITUDINAL SCRAPE COMPLETE")
+        print(f"Total Episodes Collected: {len(master_df)}")
+        print(f"Master File: {master_path}")
+        print("="*50)
     else:
-        print("\nWARNING: No data found. Check your dates or internet connection.")
+        print("\n[!] Critical Failure: No data collected from any season.")
 
 if __name__ == "__main__":
     main()
