@@ -58,8 +58,8 @@ class WoFScraper:
         first_name = name.split()[0].capitalize()
         guess = self.detector.get_gender(first_name)
         
-        if 'male' in guess: return 'M'
         if 'female' in guess: return 'F'
+        if 'male' in guess: return 'M'
         return 'Unknown'
 
     # --- NEW: MONEY SENSOR ---

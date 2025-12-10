@@ -40,9 +40,11 @@ class DataNormalizer:
             for player in players:
                 player_records.append({
                     'date': row['date'],
-                    'episode_url': row.get('episode_url', ''),
+                    'episode_url': row.get('url', row.get('episode_url', '')),
                     'player_name': player.get('name', 'Unknown'),
                     'position': player.get('position', 0),
+                    'winnings': player.get('winnings', 0),
+                    'gender': player.get('gender', 'Unknown'),
                     'episode_bankrupts': row.get('bankrupts', 0),
                     'episode_lose_a_turns': row.get('lose_a_turns', 0),
                     'estimated_spins': estimated_spins_per_player,
@@ -63,24 +65,27 @@ class DataNormalizer:
     @staticmethod
     def add_gender_classification(player_df: pd.DataFrame, gender_map: Dict[str, str] = None) -> pd.DataFrame:
         """
-        Add gender classification to player data.
-        
-        Args:
-            player_df: Player-level DataFrame
-            gender_map: Optional dictionary mapping names to genders ('M', 'F')
-            
-        Returns:
-            DataFrame with 'gender' column added
+        Add/fill gender classification to player data.
+
+        If a gender column already exists, only fill missing/Unknown values.
+        Otherwise, classify all players using WoFScraper's estimator or an
+        optional provided gender_map.
         """
-        from src.scraper import classify_gender_from_name
-        
-        if gender_map:
-            player_df['gender'] = player_df['player_name'].map(
-                lambda name: gender_map.get(name, classify_gender_from_name(name))
-            )
+        from src.scraper import WoFScraper
+
+        scraper = WoFScraper(sources=['wordpress'])
+
+        def classify(name: str) -> str:
+            if gender_map and name in gender_map:
+                return gender_map[name]
+            return scraper.estimate_gender(name)
+
+        if 'gender' in player_df.columns:
+            mask = player_df['gender'].isna() | (player_df['gender'].str.lower() == 'unknown')
+            player_df.loc[mask, 'gender'] = player_df.loc[mask, 'player_name'].apply(classify)
         else:
-            player_df['gender'] = player_df['player_name'].apply(classify_gender_from_name)
-        
+            player_df['gender'] = player_df['player_name'].apply(classify)
+
         return player_df
     
     @staticmethod
@@ -253,7 +258,13 @@ class StatisticalAnalyzer:
         Returns:
             Dictionary with test results
         """
-        from scipy import stats
+        try:
+            from scipy import stats
+        except ImportError:
+            return {
+                'error': "scipy not installed",
+                'message': "Install scipy to run statistical tests (pip install scipy)",
+            }
         
         # Filter to only M and F (exclude Unknown)
         df_filtered = player_df[player_df['gender'].isin(['M', 'F'])].copy()

@@ -15,7 +15,7 @@ import ast
 print("=== WHEEL OF FORTUNE GENDER ANALYSIS ===\n")
 print("Loading episode data...")
 
-df = pd.read_csv("data/processed/season_39_sample.csv")
+df = pd.read_csv("data/processed/season_39_multi_source.csv")
 df['date'] = pd.to_datetime(df['date'])
 
 # Parse the 'players' column (stored as string representation of list)
@@ -73,7 +73,7 @@ print("\n--- NORMALIZING TO PLAYER LEVEL ---")
 if 'players' in df.columns and any(len(p) > 0 for p in df['players']):
     player_df = DataNormalizer.normalize_to_players(df)
     
-    # Add gender classification (basic - needs manual verification for rigor!)
+    # Fill only missing/Unknown genders using scraper estimator
     player_df = DataNormalizer.add_gender_classification(player_df)
     
     print(f"✓ Expanded to {len(player_df)} player records")
@@ -130,18 +130,16 @@ if player_df is not None and len(player_df[player_df['gender'].isin(['M', 'F'])]
     plot_df = player_df[player_df['gender'].isin(['M', 'F'])].copy()
     
     # Bankrupt Rate by Gender
-    sns.boxplot(data=plot_df, x='gender', y='bankrupt_rate', ax=axes[0], palette=['skyblue', 'lightcoral'])
+    sns.boxplot(data=plot_df, x='gender', y='bankrupt_rate', hue='gender', ax=axes[0], palette=['skyblue', 'lightcoral'], legend=False)
     axes[0].set_title('Bankrupt Rate by Gender', fontsize=12, fontweight='bold')
     axes[0].set_xlabel('Gender', fontsize=11)
     axes[0].set_ylabel('Bankrupt Rate (per spin)', fontsize=11)
-    axes[0].set_xticklabels(['Male', 'Female'])
     
     # Lose-a-Turn Rate by Gender
-    sns.boxplot(data=plot_df, x='gender', y='lose_a_turn_rate', ax=axes[1], palette=['skyblue', 'lightcoral'])
+    sns.boxplot(data=plot_df, x='gender', y='lose_a_turn_rate', hue='gender', ax=axes[1], palette=['skyblue', 'lightcoral'], legend=False)
     axes[1].set_title('Lose-a-Turn Rate by Gender', fontsize=12, fontweight='bold')
     axes[1].set_xlabel('Gender', fontsize=11)
     axes[1].set_ylabel('Lose-a-Turn Rate (per spin)', fontsize=11)
-    axes[1].set_xticklabels(['Male', 'Female'])
     
     plt.tight_layout()
     plt.savefig("data/processed/gender_comparison.png", dpi=150, bbox_inches='tight')
