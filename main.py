@@ -25,6 +25,22 @@ def main():
 
     for season in SEASONS:
         print(f"\n>> PROCESSING {season['name']} ({season['start'].date()} to {season['end'].date()})")
+
+        checkpoint_dir = os.path.join("data", "processed")
+        os.makedirs(checkpoint_dir, exist_ok=True)
+        checkpoint_path = os.path.join(checkpoint_dir, f"{season['name']}_raw.csv")
+
+        # Skip seasons we've already scraped (resume-friendly)
+        if os.path.exists(checkpoint_path):
+            print(f"   [skip] {season['name']} already exists at {checkpoint_path}")
+            # Load for master merge
+            try:
+                existing_df = pd.read_csv(checkpoint_path)
+                existing_df['season_id'] = season['name']
+                all_season_data.append(existing_df)
+            except Exception as e:
+                print(f"   [warn] Could not load existing checkpoint: {e}")
+            continue
         
         # Scrape the specific date range
         df = scraper.batch_scrape_season(season['start'], season['end'])
@@ -35,10 +51,6 @@ def main():
             all_season_data.append(df)
             
             # Save individual checkpoints (safety first!)
-            checkpoint_dir = os.path.join("data", "processed")
-            os.makedirs(checkpoint_dir, exist_ok=True)
-            
-            checkpoint_path = os.path.join(checkpoint_dir, f"{season['name']}_raw.csv")
             df.to_csv(checkpoint_path, index=False)
             print(f"   [Saved Checkpoint]: {checkpoint_path}")
         else:
