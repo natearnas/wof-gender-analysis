@@ -6,46 +6,24 @@ from scipy import stats
 import ast
 
 # --- CONFIGURATION ---
-DATA_PATH = "data/processed/season_39_multi_source.csv"  # Ensure this matches your actual filename
+DATA_PATH = "data/processed/player_level_data.csv"  # Use pre-normalized player-level data
 IMG_DIR = "."  # Saves images in current directory
 
 def load_and_clean_data(file_path):
     """
-    Loads raw scraper output, explodes player lists, and strictly filters 
-    for confirmed 'M' or 'F' genders (Listwise Deletion of Unknowns).
+    Loads player-level data (pre-normalized from 01_data_validation.py)
+    and strictly filters for confirmed 'M' or 'F' genders (Listwise Deletion of Unknowns).
     """
     try:
         df = pd.read_csv(file_path)
     except FileNotFoundError:
-        print(f"Error: Could not find {file_path}. Run main.py first.")
+        print(f"Error: Could not find {file_path}. Run 01_data_validation.py first.")
         return None
 
-    player_rows = []
+    # Filter to only confirmed M/F (exclude Unknown)
+    df_filtered = df[df['gender'].isin(['M', 'F'])].copy()
     
-    for _, row in df.iterrows():
-        # Parse the stringified list of players
-        if isinstance(row['players'], str):
-            try:
-                players_list = ast.literal_eval(row['players'])
-            except:
-                continue 
-                
-            for p in players_list:
-                # STRICT FILTER: Only 'M' or 'F'
-                gender = p.get('gender', 'Unknown')
-                if gender not in ['M', 'F']:
-                    continue
-                    
-                player_rows.append({
-                    'date': row['date'],
-                    'name': p.get('name'),
-                    'gender': gender,
-                    'winnings': p.get('winnings', 0),
-                    # Proxy: Episode bankrupts represent the "Risk Environment" this player faced
-                    'episode_bankrupts': row['bankrupts']
-                })
-
-    return pd.DataFrame(player_rows)
+    return df_filtered
 
 def analyze_winnings(df):
     print("\n" + "="*40)

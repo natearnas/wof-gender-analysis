@@ -1,0 +1,85 @@
+================================================================================
+WHEEL OF FORTUNE GENDER ANALYSIS - HYPOTHESIS TESTING RESULTS
+6-SEASON LONGITUDINAL DATASET (S36-S41)
+================================================================================
+Analysis Date: December 13, 2025
+Dataset: data/processed/player_level_data.csv
+Sample Size: 6,371 player records (2,656 Male, 3,715 Female)
+Analysis Method: Standard T-Test + Mann-Whitney U + Bootstrap Simulation
+
+================================================================================
+PHASE 1: DESCRIPTIVE STATISTICS
+================================================================================
+
+Male Players (n=2,656):
+  Mean Winnings:    $7,669.36
+  Median Winnings:  $3,500.00
+  Std Dev:          (calculated by scipy)
+
+Female Players (n=3,715):
+  Mean Winnings:    $6,846.41
+  Median Winnings:  $3,050.00
+  Std Dev:          (calculated by scipy)
+
+Raw Difference: Men earn $822.95 more on average
+
+================================================================================
+PHASE 2: STATISTICAL TESTS
+================================================================================
+
+Test 1: Standard Parametric T-Test (Welch's)
+  T-Statistic: (calculated)
+  P-Value:     0.0003
+  Conclusion:  SIGNIFICANT difference detected
+  Note:        Assumes normality (violated for WoF data - see below)
+
+Test 2: Normality Check (Shapiro-Wilk)
+  Men:         p = 0.0000 (NOT Normal, right-skewed)
+  Women:       p = 0.0000 (NOT Normal, right-skewed)
+  Conclusion:  Data violates normality assumption
+  Action:      Use non-parametric Mann-Whitney U as primary test
+
+Test 3: Non-Parametric Mann-Whitney U Test (More Reliable)
+  U-Statistic: (calculated)
+  P-Value:     0.0126
+  Conclusion:  SIGNIFICANT difference confirmed
+  Interpretation: Even accounting for non-normality, males win significantly more
+
+================================================================================
+PHASE 3: BOOTSTRAP SIMULATION (10,000 Runs)
+================================================================================
+
+Observed Mean Difference: $822.95 (Male - Female)
+95% Confidence Interval: [$376.97, $1,275.79]
+Interpretation: 
+  - The $0 value is NOT in the confidence interval
+  - The difference is statistically robust and economically meaningful
+  - We can be 95% confident the true difference lies between $377 and $1,276
+
+================================================================================
+FINAL CONCLUSION
+================================================================================
+
+PRIMARY FINDING: Male contestants win significantly more money than female
+contestants in Wheel of Fortune, with a robust difference of approximately
+$823 per player (95% CI: $377–$1,276).
+
+EFFECT SIZE: The difference is both statistically significant (p=0.0126) and
+economically substantial (~12% higher for men).
+
+CONFIDENCE: High. Results are robust across:
+  1. Parametric tests (T-test: p=0.0003)
+  2. Non-parametric tests (Mann-Whitney: p=0.0126)
+  3. Bootstrap simulation (CI excludes zero)
+
+CAVEAT: This is a cross-sectional analysis. Gender may be confounded with
+other factors (e.g., contestant demographics, time period effects). The
+longitudinal (DiD) analysis addresses some of these concerns.
+
+================================================================================
+OUTPUT FILES
+================================================================================
+- comprehensive_analysis.png: Visualization of distributions and test results
+- player_level_data.csv: Full player-level dataset with gender classifications
+
+================================================================================

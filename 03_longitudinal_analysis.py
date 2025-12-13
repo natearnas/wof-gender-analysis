@@ -3,6 +3,8 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 import ast
+import numpy as np
+from scipy import stats
 
 # --- CONFIGURATION ---
 DATA_PATH = "data/processed/longitudinal_data_raw.csv" 
@@ -12,8 +14,12 @@ def load_multi_season_data(file_path):
     try:
         df = pd.read_csv(file_path)
     except FileNotFoundError:
-        print("Error: File not found. Wait for the scrape to finish!")
-        return None
+        # Fallback for different folder structures
+        try:
+            df = pd.read_csv("longitudinal_data_raw.csv")
+        except:
+            print("Error: File not found. Wait for the scrape to finish!")
+            return None
 
     player_rows = []
     
@@ -40,56 +46,115 @@ def load_multi_season_data(file_path):
 def analyze_interface_impact(df):
     print("--- INTERFACE CHANGE ANALYSIS (Difference-in-Differences) ---")
     
-    # 1. Define the Eras (The "Experimental Design")
-    # Treatment Group (Plastic Cap): S38, S39
-    # Control Group (Hands on Wheel): S36, S37, S40, S41
+    # 1. Define the Eras
     target_seasons = ['S38', 'S39']
     df['is_white_thing_era'] = df['season'].isin(target_seasons)
-    
-    # Check if we actually have data for these seasons
     print("Seasons found in data:", sorted(df['season'].unique()))
     
-    # 2. Visualize the Trend (The "Hero Graph")
+    # --- PLOTTING SECTION ---
+    
+    # Plot A: The Longitudinal Trend (The "Hero Graph")
     plt.figure(figsize=(12, 6))
-    
-    # Calculate average winnings per season per gender
-    season_stats = df.groupby(['season', 'gender'])['winnings'].mean().reset_index()
-    
-    # Plot Trend Lines
-    sns.lineplot(data=season_stats, x='season', y='winnings', hue='gender', 
+    season_stats = df.groupby(['season', 'gender'])['winnings'].agg(['mean', 'count']).reset_index()
+    sns.lineplot(data=season_stats, x='season', y='mean', hue='gender', 
                  palette={'M': 'skyblue', 'F': 'lightpink'}, marker="o", linewidth=2.5)
-    
-    # Highlight the "White Thing" Era
     plt.axvspan('S38', 'S39', color='gray', alpha=0.15, label='Plastic Cap Era')
-    
-    plt.title("Impact of Physical Interface on Winnings (S36-S41)")
+    plt.title(f"Impact of Physical Interface on Winnings (N={len(df)})")
     plt.ylabel("Average Winnings ($)")
     plt.xlabel("Season")
     plt.legend()
     plt.grid(True, linestyle='--', alpha=0.6)
-    
     plt.savefig(f"{IMG_DIR}/did_analysis_trend.png")
     print(f"Saved plot: {IMG_DIR}/did_analysis_trend.png")
+
+    # Plot B: The Distributions (The "Robustness Graph")
+    # This proves the data is non-normal, justifying the Mann-Whitney U test
+    plt.figure(figsize=(14, 6))
+
+    # Winnings Histogram
+    plt.subplot(1, 2, 1)
+    sns.histplot(data=df, x='winnings', hue='gender', kde=True, 
+                 palette={'M': 'skyblue', 'F': 'lightpink'}, element="step")
+    plt.title("Distribution of Winnings (Non-Normal)")
+    plt.xlabel("Winnings ($)")
+    plt.ylabel("Frequency")
+
+    # Bankrupts Histogram
+    plt.subplot(1, 2, 2)
+    sns.histplot(data=df, x='bankrupts', hue='gender', multiple="dodge", 
+                 shrink=.8, bins=range(0, 10), palette={'M': 'skyblue', 'F': 'lightpink'})
+    plt.title("Distribution of Bankrupts")
+    plt.xlabel("Bankrupts per Episode")
+    plt.ylabel("Count")
+
+    plt.tight_layout()
+    plt.savefig(f"{IMG_DIR}/distributions.png")
+    print(f"Saved plot: {IMG_DIR}/distributions.png")
     
-    # 3. Difference-in-Differences (DiD) Model
-    # We are testing: Did the GAP change during the Cap Era?
-    # Formula: Winnings ~ Gender + Era + (Gender * Era)
+    # --- STATISTICS SECTION ---
+
+    # 2. Difference-in-Differences (DiD) Model
     print("\n[Running OLS Regression...]")
     model = smf.ols("winnings ~ C(gender) * C(is_white_thing_era)", data=df).fit()
-    
     print(model.summary())
     
-    # Extract the "Interaction Term" (The most important number)
     try:
         interaction_p = model.pvalues['C(gender)[T.M]:C(is_white_thing_era)[T.True]']
         print(f"\n>> INTERACTION P-VALUE: {interaction_p:.4f}")
-        
-        if interaction_p < 0.05:
-            print(">> SIGNIFICANT RESULT: The plastic cap altered the gender dynamics of the game.")
-        else:
-            print(">> NULL RESULT: The plastic cap had NO statistically significant effect on the gender gap.")
     except KeyError:
-        print("Error: Could not calculate interaction. Check if S38/S39 data exists.")
+        print("Error: Could not calculate interaction.")
+
+    # 3. Global Economy Check
+    print("\n" + "="*50)
+    print("--- GLOBAL ECONOMY CHECK ---")
+    
+    global_stats = df.groupby('is_white_thing_era')['winnings'].mean()
+    print("\nAverage Winnings per Player:")
+    print(global_stats)
+    
+    normal_era = df[~df['is_white_thing_era']]['winnings']
+    cap_era = df[df['is_white_thing_era']]['winnings']
+    
+    t_stat, p_val = stats.ttest_ind(normal_era, cap_era, equal_var=False)
+    print(f"\nGlobal Winnings T-Test (Cap vs. Normal): P-Value = {p_val:.4f}")
+
+    # 4. Robustness Checks
+    print("\n" + "="*50)
+    print("--- ROBUSTNESS CHECKS ---")
+
+    # A. Mann-Whitney U Test
+    m_winnings = df[(~df['is_white_thing_era']) & (df['gender'] == 'M')]['winnings']
+    f_winnings = df[(~df['is_white_thing_era']) & (df['gender'] == 'F')]['winnings']
+    u_stat, mw_p_val = stats.mannwhitneyu(m_winnings, f_winnings, alternative='greater')
+    print(f"\n1. Mann-Whitney U Test (Baseline Gap): P-Value = {mw_p_val:.5f}")
+
+    # B. Bootstrap Resampling
+    print(f"\n2. Bootstrap Resampling (2,000 Iterations)...")
+    
+    n_bootstraps = 2000
+    boot_diffs = []
+    
+    for i in range(n_bootstraps):
+        resample = df.sample(frac=1.0, replace=True)
+        means = resample.groupby(['is_white_thing_era', 'gender'])['winnings'].mean()
+        try:
+            gap_cap = means[True]['M'] - means[True]['F']
+            gap_norm = means[False]['M'] - means[False]['F']
+            boot_diffs.append(gap_cap - gap_norm)
+        except KeyError:
+            continue
+
+    ci_lower = np.percentile(boot_diffs, 2.5)
+    ci_upper = np.percentile(boot_diffs, 97.5)
+    mean_est = np.mean(boot_diffs)
+
+    print(f"   Mean Estimated Effect: ${mean_est:.2f}")
+    print(f"   95% CI: [${ci_lower:.2f}, ${ci_upper:.2f}]")
+    
+    if ci_upper < 0:
+        print("   >> RESULT: ROBUST (CI does not cross zero).")
+    else:
+        print("   >> RESULT: WEAK (CI crosses zero).")
 
 if __name__ == "__main__":
     df = load_multi_season_data(DATA_PATH)

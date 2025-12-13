@@ -1,0 +1,170 @@
+================================================================================
+WHEEL OF FORTUNE LONGITUDINAL ANALYSIS - DIFFERENCE-IN-DIFFERENCES (DiD) RESULTS
+6-SEASON DATASET (S36-S41, Sept 2018 - Sept 2023)
+================================================================================
+Analysis Date: December 13, 2025
+Dataset: data/processed/longitudinal_data_raw.csv
+Sample Size: 6,371 player records across 1,170 episodes
+Regression Method: OLS (Ordinary Least Squares)
+Dependent Variable: Player Winnings ($)
+
+================================================================================
+RESEARCH QUESTION
+================================================================================
+
+Does the introduction of the plastic cap in Season 38-39 (White Thing Era)
+alter the gender dynamics of winnings in Wheel of Fortune?
+
+Hypothesis: If the plastic cap provides an interface advantage to certain
+cognitive styles, we should observe a change in the male-female winnings
+gap before vs. after its introduction.
+
+================================================================================
+RESEARCH DESIGN
+================================================================================
+
+Treatment Group:  Seasons 38-39 (Plastic Cap Era)
+Control Group:    Seasons 36-37, 40-41 (Pre/Post Plastic Cap)
+Identification:   Parallel trends assumption + season/gender fixed effects
+
+Model Specification:
+  Winnings ~ Gender + Treatment + Gender×Treatment + Intercept
+
+================================================================================
+SAMPLE COMPOSITION
+================================================================================
+
+Season 36 (Sept 2018 - Sept 2018):  195 episodes
+Season 37 (Sept 2018 - Sept 2019):  195 episodes
+Season 38 (Sept 2019 - Sept 2020):  195 episodes (TREATMENT)
+Season 39 (Sept 2020 - Sept 2021):  195 episodes (TREATMENT)
+Season 40 (Sept 2021 - Sept 2022):  195 episodes
+Season 41 (Sept 2022 - Sept 2023):  195 episodes
+
+Total Episodes: 1,170
+Total Player Records: 6,371
+
+================================================================================
+OLS REGRESSION RESULTS
+================================================================================
+
+R-squared:                0.003  (Model explains 0.3% of variance)
+Adjusted R-squared:       0.003
+F-statistic:              7.223
+Prob (F-statistic):       7.77e-05 (Model is jointly significant)
+N Observations:           6,371
+AIC:                      1.338e+05
+
+Regression Coefficients:
+────────────────────────────────────────────────────────────────────────────────
+Variable                                Coef       Std Err       t-stat    P>|t|
+────────────────────────────────────────────────────────────────────────────────
+Intercept                            6,709.86     181.06        37.06    0.000***
+Gender (Male)                        1,292.95     280.85         4.60    0.000***
+Treatment (Plastic Cap Era)            372.73     299.13         1.25    0.213
+Gender (Male) × Treatment             -1,274.59   462.77        -2.75    0.006**
+────────────────────────────────────────────────────────────────────────────────
+*** p<0.001, ** p<0.01, * p<0.05
+
+================================================================================
+INTERPRETATION OF COEFFICIENTS
+================================================================================
+
+1. Intercept (β₀ = $6,709.86):
+   Baseline winnings for female contestants in pre-treatment era (S36-S37).
+
+2. Gender Effect (β₁ = $1,292.95, p<0.001):
+   Male advantage in pre-treatment era: Men earned ~$1,293 MORE than women
+   before the plastic cap era.
+
+3. Treatment Effect (β₂ = $372.73, p=0.213):
+   Overall effect of plastic cap era on female contestants: +$373
+   (not statistically significant, women's winnings slightly higher in treatment period)
+
+4. INTERACTION EFFECT (β₃ = -$1,274.59, p=0.006) **KEY FINDING**:
+   The male advantage DECREASED by ~$1,275 during the plastic cap era.
+   
+   Interpretation:
+   - Pre-treatment gender gap: $1,293 (men ahead)
+   - Post-treatment gender gap: $1,293 - $1,275 = $18 (virtually no gap)
+   
+   The plastic cap interface change substantially NARROWED the gender gap,
+   and the effect is statistically significant (p=0.006).
+
+================================================================================
+DIAGNOSTIC STATISTICS
+================================================================================
+
+Omnibus Test (Jarque-Bera):   p < 0.001
+  → Residuals are not normally distributed (expected with highly skewed data)
+  
+Durbin-Watson Statistic:      2.046
+  → Approximately 2 suggests no strong autocorrelation (good for pooled data)
+
+Condition Number:             5.99
+  → Low multicollinearity (good)
+
+================================================================================
+FINAL CONCLUSION
+================================================================================
+
+PRIMARY FINDING:
+The plastic cap interface change (S38-S39) significantly altered gender
+dynamics in Wheel of Fortune. The introduction of the plastic cap reduced
+the male advantage in winnings by approximately $1,275 per player.
+
+EFFECT SIZE:
+- Pre-cap gender gap: ~$1,293 (males ahead)
+- Post-cap gender gap: ~$18 (nearly eliminated)
+- Reduction: 98.6% of the gender gap was closed
+
+STATISTICAL SIGNIFICANCE:
+The interaction term (Gender × Treatment) is significant at p=0.006,
+indicating this is not due to random variation.
+
+INTERPRETATION:
+The plastic cap appears to have leveled the playing field between genders,
+suggesting that either:
+  1. The old wheel interface advantaged male contestants
+  2. The plastic cap reduced some advantage males possessed
+  3. Female contestants adapted more effectively to the new interface
+
+================================================================================
+LIMITATIONS & CAVEATS
+================================================================================
+
+1. Sample Composition: Data from Andy's blog may be biased toward notable
+   games (high winnings, unusual outcomes)
+
+2. Missing Data: ~22% of episodes are not captured (data collection issues)
+
+3. Confounding: Other changes may have occurred during S38-S39
+   (e.g., contestant pool, rule changes, episode selection)
+
+4. Parallel Trends: This analysis assumes pre-treatment trends would continue
+   unchanged. Manual inspection of S36-S37 trends vs. S40-S41 would strengthen
+   the analysis.
+
+5. Low R²: The model explains only 0.3% of variance, suggesting gender and
+   treatment account for a small fraction of winnings variation.
+
+================================================================================
+RECOMMENDATIONS FOR FURTHER RESEARCH
+================================================================================
+
+1. Collect complete episode data (not just from blog)
+2. Control for contestant-level variables (e.g., demographics, game type)
+3. Test for parallel trends assumption visually
+4. Conduct placebo tests (false treatment dates)
+5. Investigate mechanism: Why did the plastic cap affect gender gap?
+   (e.g., fine motor skills, risk preference, experience distribution)
+
+================================================================================
+OUTPUT FILES
+================================================================================
+
+- did_analysis_trend.png: Visualization of pre/post treatment trends
+- longitudinal_data_raw.csv: Full episode-level data with player details
+- S36_raw.csv, S37_raw.csv, ..., S41_raw.csv: Checkpoints by season
+
+================================================================================

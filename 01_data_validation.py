@@ -12,17 +12,17 @@ import ast
 
 
 #%% 1. Load the Scraped Data
-print("=== WHEEL OF FORTUNE GENDER ANALYSIS ===\n")
-print("Loading episode data...")
+print("=== WHEEL OF FORTUNE GENDER ANALYSIS (6-SEASON LONGITUDINAL) ===\n")
+print("Loading longitudinal episode data (S36-S41)...")
 
-df = pd.read_csv("data/processed/season_39_multi_source.csv")
+df = pd.read_csv("data/processed/longitudinal_data_raw.csv")
 df['date'] = pd.to_datetime(df['date'])
 
 # Parse the 'players' column (stored as string representation of list)
 if 'players' in df.columns:
     df['players'] = df['players'].apply(lambda x: ast.literal_eval(x) if pd.notna(x) and x != '[]' else [])
 
-print(f"✓ Loaded {len(df)} episodes.")
+print(f"✓ Loaded {len(df)} episodes across {df['season_id'].nunique()} seasons.")
 
 
 #%% 2. Data Integrity Analysis (Gap Analysis)
