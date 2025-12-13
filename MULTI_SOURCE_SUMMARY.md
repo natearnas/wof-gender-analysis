@@ -190,6 +190,29 @@ df_wordpress = df_analysis[df_analysis['source'] == 'WordPress']
 6. ✅ Decide on handling disagreements (e.g., use primary source, average, manual check)
 7. ✅ Proceed with gender classification and statistical tests
 
+## Results (S36–S41)
+
+- Cross-Sectional:
+  - Mean difference (Men − Women): ~$823
+  - Mann-Whitney U: p=0.0126
+  - Bootstrap 95% CI: [$377, $1,276]
+
+- Longitudinal DiD (S38–S39 treatment):
+  - Gender × Treatment: −$1,275 (p=0.006)
+  - Global average winnings unchanged (p=0.488)
+
+## Run & Outputs
+
+```powershell
+.venv\Scripts\python.exe 01_data_validation.py
+.venv\Scripts\python.exe 02_hypothesis_testing.py
+.venv\Scripts\python.exe 03_longitudinal_analysis.py
+```
+
+- data/processed/hypothesis_testing_results.txt
+- data/processed/longitudinal_did_results.txt
+- comprehensive_analysis.png, did_analysis_trend.png, winnings_by_era_barplot.png
+
 ## Test First!
 
 ```bash

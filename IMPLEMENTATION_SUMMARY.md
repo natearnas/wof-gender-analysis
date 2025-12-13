@@ -117,6 +117,37 @@ Before running production scrapes:
 5. **Improve gender classification**: Implement proper name-gender database
 6. **Scale up**: Once validated, scrape full season(s)
 
+## Results (S36–S41)
+
+- Hypothesis Testing (cross-sectional):
+   - Mean difference (Men − Women): ~$823
+   - Mann-Whitney U: p=0.0126
+   - Bootstrap 95% CI: [$377, $1,276] → excludes $0
+
+- Longitudinal DiD (interface change S38–S39):
+   - Interaction (Gender × Treatment): −$1,275 (p=0.006)
+   - Global winnings unchanged (p=0.488)
+   - Robustness checks: Mann-Whitney and bootstrap confirm effect
+
+## How to Run
+
+```powershell
+.venv\Scripts\python.exe main.py                  # Scrape S36–S41 (resume-safe)
+.venv\Scripts\python.exe 01_data_validation.py    # Expand to player-level, gap plots
+.venv\Scripts\python.exe 02_hypothesis_testing.py # T-test, MWU, bootstrap
+.venv\Scripts\python.exe 03_longitudinal_analysis.py # DiD + robustness
+```
+
+## Key Outputs
+
+- data/processed/hypothesis_testing_results.txt
+- data/processed/longitudinal_did_results.txt
+- comprehensive_analysis.png
+- did_analysis_trend.png
+- winnings_by_era_barplot.png
+- gender_comparison.png
+- gap_analysis.png
+
 ## Data Quality Considerations
 
 For your blog post on **Experimental Design Rigor**, consider discussing:
