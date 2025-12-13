@@ -164,6 +164,7 @@ OUTPUT FILES
 ================================================================================
 
 - did_analysis_trend.png: Visualization of pre/post treatment trends
+- winnings_by_era_barplot.png: Bar plot of average winnings by era and gender
 - longitudinal_data_raw.csv: Full episode-level data with player details
 - S36_raw.csv, S37_raw.csv, ..., S41_raw.csv: Checkpoints by season
 
