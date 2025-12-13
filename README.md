@@ -1,3 +1,64 @@
+## Study Summary (S36–S41)
+
+- Key Question: Did the plastic cap alter gender dynamics in winnings?
+- Dataset: 1,170 episodes, 7,668 player records
+- Main Finding: The male advantage in winnings decreased by ~$1,275 during the plastic cap era (p=0.006, DiD regression). Global winnings stayed stable (p=0.488).
+
+### Hypothesis Testing (Cross-Sectional)
+- Mean difference (Men − Women): ~$823
+- Mann-Whitney U: p=0.0126
+- Bootstrap 95% CI: [$377, $1,276] (excludes $0)
+
+### Longitudinal DiD (Interface Change)
+- Treatment: S38–S39 (plastic cap era)
+- Control: S36–S37, S40–S41
+- Interaction term (Gender × Treatment): −$1,275 (p=0.006)
+- Robustness: Mann-Whitney and bootstrap confirm effect; global economy unchanged.
+
+## Quick Start
+4. Run analyses:
+
+    - Data validation (player-level expansion, gap plots)
+
+      ```powershell
+      .venv\Scripts\python.exe 01_data_validation.py
+      ```
+
+    - Hypothesis testing (t-test, MWU, bootstrap)
+
+      ```powershell
+      .venv\Scripts\python.exe 02_hypothesis_testing.py
+      ```
+
+    - Longitudinal DiD (regression + robustness checks)
+
+      ```powershell
+      .venv\Scripts\python.exe 03_longitudinal_analysis.py
+      ```
+
+## Key Outputs
+
+- Summaries:
+  - data/processed/hypothesis_testing_results.txt
+  - data/processed/longitudinal_did_results.txt
+
+- Plots:
+  - comprehensive_analysis.png
+  - did_analysis_trend.png
+  - winnings_by_era_barplot.png
+  - gender_comparison.png
+  - gap_analysis.png
+
+- Data:
+  - data/processed/player_level_data.csv
+  - data/processed/longitudinal_data_raw.csv
+  - data/processed/S36_raw.csv … S41_raw.csv
+
+## Notes
+
+- Missing data (~22% episodes) largely reflect summer hiatus/coverage gaps.
+- Gender for some players marked Unknown; consider manual validation for reliability.
+- For publication, review assumptions (parallel trends) and add placebo checks.
 # Wheel of Fortune Gender Analysis
 
 A data science project analyzing Wheel of Fortune spin outcomes to test for gender-based variances in "Bankrupt" and "Lose a Turn" frequencies. This project demonstrates experimental design rigor, data integrity analysis, gap analysis, and inter-observer reliability.
