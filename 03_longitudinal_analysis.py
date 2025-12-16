@@ -53,7 +53,7 @@ def analyze_interface_impact(df):
     
     # --- PLOTTING SECTION ---
     
-    # Plot A: The Longitudinal Trend (The "Hero Graph")
+    # Plot A: The Longitudinal Trend (Figure 1 in Blog)
     plt.figure(figsize=(12, 6))
     season_stats = df.groupby(['season', 'gender'])['winnings'].agg(['mean', 'count']).reset_index()
     sns.lineplot(data=season_stats, x='season', y='mean', hue='gender', 
@@ -67,8 +67,28 @@ def analyze_interface_impact(df):
     plt.savefig(f"{IMG_DIR}/did_analysis_trend.png")
     print(f"Saved plot: {IMG_DIR}/did_analysis_trend.png")
 
-    # Plot B: The Distributions (The "Robustness Graph")
-    # This proves the data is non-normal, justifying the Mann-Whitney U test
+    # Plot B: The "Gap Eraser" Bar Chart (Figure 2 in Blog) -- [ADDED THIS]
+    plt.figure(figsize=(10, 6))
+    # Create readable labels for the X-axis
+    df['Era_Label'] = df['is_white_thing_era'].apply(lambda x: "Plastic Cap (S38-39)" if x else "Normal (S36-37, S40-41)")
+    
+    sns.barplot(
+        data=df, 
+        x='Era_Label', 
+        y='winnings', 
+        hue='gender', 
+        palette={'M': 'skyblue', 'F': 'lightpink'},
+        order=["Normal (S36-37, S40-41)", "Plastic Cap (S38-39)"], # Force specific order
+        capsize=.1,
+        errorbar=('ci', 68) # Standard Error bars
+    )
+    plt.title("Gender Winnings Gap: Normal vs. Plastic Cap Era")
+    plt.xlabel("Interface Era")
+    plt.ylabel("Average Winnings ($)")
+    plt.savefig(f"{IMG_DIR}/winnings_by_era_barplot.png")
+    print(f"Saved plot: {IMG_DIR}/winnings_by_era_barplot.png")
+
+    # Plot C: The Distributions (Figure 3 in Blog)
     plt.figure(figsize=(14, 6))
 
     # Winnings Histogram
