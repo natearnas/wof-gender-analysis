@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy import stats
-import ast
 
 # --- CONFIGURATION ---
 DATA_PATH = "data/processed/player_level_data.csv"  # Use pre-normalized player-level data
@@ -113,7 +112,7 @@ def plot_results(df, boot_diffs, ci_low, ci_high):
     axes[1].axvline(ci_low, color='red', linestyle='--', label='95% CI')
     axes[1].axvline(ci_high, color='red', linestyle='--')
     axes[1].axvline(0, color='black', linewidth=2, label='Zero Diff')
-    axes[1].set_title(f"Bootstrap Simulation of Gender Gap\n(Men - Women)")
+    axes[1].set_title("Bootstrap Simulation of Gender Gap\n(Men - Women)")
     axes[1].set_xlabel("Difference in Mean Winnings ($)")
     axes[1].legend()
     

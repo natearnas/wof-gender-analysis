@@ -52,14 +52,17 @@ class WoFScraper:
         Uses gender_guesser to estimate gender from first name.
         Returns: 'M', 'F', or 'Unknown'
         """
-        if not name: return 'Unknown'
+        if not name:
+            return 'Unknown'
         
         # Take first word, capitalize
         first_name = name.split()[0].capitalize()
         guess = self.detector.get_gender(first_name)
         
-        if 'female' in guess: return 'F'
-        if 'male' in guess: return 'M'
+        if 'female' in guess:
+            return 'F'
+        if 'male' in guess:
+            return 'M'
         return 'Unknown'
 
     # --- NEW: MONEY SENSOR ---
@@ -150,11 +153,13 @@ class WoFScraper:
         
         try:
             response = self.session.get(url, timeout=10)
-            if response.status_code != 200: return None
+            if response.status_code != 200:
+                return None
             
             soup = BeautifulSoup(response.content, 'html.parser')
             content = soup.find('div', class_='entry-content')
-            if not content: return None
+            if not content:
+                return None
             
             text = content.get_text()
             
@@ -201,7 +206,8 @@ class WoFScraper:
                 if response.status_code == 200:
                     soup = BeautifulSoup(response.text, 'html.parser')
                     episode_data = self._parse_forum_page(soup, date_obj, url)
-                    if episode_data: return episode_data
+                    if episode_data:
+                        return episode_data
             except Exception:
                 continue
         return None
@@ -213,7 +219,8 @@ class WoFScraper:
             target_date.strftime("%m/%d/%Y"),
             target_date.strftime("%m/%d/%y"),
         ]
-        if not any(pattern in page_text for pattern in date_patterns): return None
+        if not any(pattern in page_text for pattern in date_patterns):
+            return None
         
         bankrupts = len(re.findall(r'\bBANKRUPT\b', page_text, re.IGNORECASE))
         # UPDATED: Robust LAT Regex
@@ -261,7 +268,8 @@ class WoFScraper:
         search_areas.extend(soup.find_all('div', class_=['entry-content', 'post', 'content', 'message']))
         
         for div in search_areas:
-            if not div: continue
+            if not div:
+                continue
             text = div.get_text()
             
             # Pattern 1: "Tonight's contestants:"
@@ -270,8 +278,10 @@ class WoFScraper:
                 names = re.split(r',\s*(?:and\s+)?|\s+and\s+', contestant_match.group(1))
                 for i, name in enumerate(names[:3]):
                     clean = self._clean_player_name(name)
-                    if clean: players.append({'name': clean, 'position': i + 1})
-                if players: break
+                    if clean:
+                        players.append({'name': clean, 'position': i + 1})
+                if players:
+                    break
             
             # Pattern 2: Position markers
             position_pattern = r'(?:Red|Yellow|Blue|\$1,?000|\$2,?000|\$3,?000):\s*([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)'
@@ -279,8 +289,10 @@ class WoFScraper:
             if position_matches and not players:
                 for i, name in enumerate(position_matches[:3]):
                     clean = self._clean_player_name(name)
-                    if clean: players.append({'name': clean, 'position': i + 1})
-                if players: break
+                    if clean:
+                        players.append({'name': clean, 'position': i + 1})
+                if players:
+                    break
                 
             # Pattern 3: Bold tags
             if not players:
@@ -293,12 +305,16 @@ class WoFScraper:
         return players[:3] if players else []
 
     def _clean_player_name(self, name: str) -> Optional[str]:
-        if not name: return None
+        if not name:
+            return None
         name = re.sub(r'\s+', ' ', name.strip())
         name = re.sub(r'\(.*?\)', '', name)
         name = re.sub(r'from\s+.*$', '', name, flags=re.IGNORECASE)
         name = name.strip()
-        if len(name) < 2 or len(name) > 50: return None
-        if not re.search(r'[A-Za-z]', name): return None
-        if name.isupper() and len(name) > 4: name = name.title()
+        if len(name) < 2 or len(name) > 50:
+            return None
+        if not re.search(r'[A-Za-z]', name):
+            return None
+        if name.isupper() and len(name) > 4:
+            name = name.title()
         return name

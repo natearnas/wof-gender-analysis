@@ -5,7 +5,6 @@ Run this before attempting to scrape large date ranges.
 
 from src.scraper import WoFScraper, classify_gender_from_name
 from src.utils import DataNormalizer, ReliabilityAnalyzer
-from datetime import datetime
 import pandas as pd
 
 print("=== WOF SCRAPER TEST SUITE ===\n")

@@ -1,7 +1,6 @@
 from src.scraper import WoFScraper
 from datetime import datetime
 import os
-import pandas as pd
 
 # --- CONFIGURATION ---
 # Full Season 39 (Sept 13, 2021 - May 27, 2022, but we'll cap at Dec 31 for now)
