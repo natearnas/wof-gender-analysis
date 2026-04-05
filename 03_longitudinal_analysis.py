@@ -17,7 +17,7 @@ def load_multi_season_data(file_path):
         # Fallback for different folder structures
         try:
             df = pd.read_csv("longitudinal_data_raw.csv")
-        except:
+        except FileNotFoundError:
             print("Error: File not found. Wait for the scrape to finish!")
             return None
 
@@ -39,7 +39,7 @@ def load_multi_season_data(file_path):
                             'winnings': p.get('winnings', 0),
                             'bankrupts': row['bankrupts']
                         })
-            except:
+            except (ValueError, SyntaxError, TypeError):
                 continue
     return pd.DataFrame(player_rows)
 
@@ -149,7 +149,7 @@ def analyze_interface_impact(df):
     print(f"\n1. Mann-Whitney U Test (Baseline Gap): P-Value = {mw_p_val:.5f}")
 
     # B. Bootstrap Resampling
-    print(f"\n2. Bootstrap Resampling (2,000 Iterations)...")
+    print("\n2. Bootstrap Resampling (2,000 Iterations)...")
     
     n_bootstraps = 2000
     boot_diffs = []

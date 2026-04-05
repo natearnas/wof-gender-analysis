@@ -63,7 +63,7 @@ def main():
         master_df.to_csv(master_path, index=False)
         
         print("\n" + "="*50)
-        print(f"LONGITUDINAL SCRAPE COMPLETE")
+        print("LONGITUDINAL SCRAPE COMPLETE")
         print(f"Total Episodes Collected: {len(master_df)}")
         print(f"Master File: {master_path}")
         print("="*50)
