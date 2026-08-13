@@ -6,8 +6,9 @@ The project tests whether Wheel of Fortune winnings patterns differ by gender, w
 
 ## Project Context
 
-- The original write-up was published earlier as a long-form blog post:
-  - <https://arnastech.com/f/did-covid-break-the-wheel-a-6-season-forensic-analysis-of-gender#8de304a8-9dee-47d4-b205-42cfa92ee11f>
+- The original write-up was published as a long-form post on the
+  [Arnas Technologies blog](https://arnastech.com/blog):
+  - [Did COVID Break the Wheel of Fortune?](https://arnastech.com/blog/did-covid-break-the-wheel)
 - This repository is the public, reproducible release of that work.
 - The intent is transparency: code, core data artifacts, and outputs are all available for inspection.
 
